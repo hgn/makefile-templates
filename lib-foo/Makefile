@@ -2,10 +2,37 @@ LIB_NAME = libfoo
 LIB_VERSION = 1.0.0
 LIB_VERSION_MAJOR = 1
 
-# flags for release builds
+# Enable debugging information (using -g),
+# even for optimized production builds. Having
+# only partly usable debugging information (due
+# to optimization) certainly beats having none at
+# all. With GCC, generating debugging information
+# does not alter code generation. It is possible
+# to use tools such as eu-strip to separate debugging
+# information before distributing binaries
+CFLAGS += -g -grecord-gcc-switches
+
+# if the target is "release" we include the
+# default release CFLAGS, LDFLAGS, ...
+# we start with the same flags as debug
+ifeq ($(MAKECMDGOALS),release)
+	include ../compiler-defines/lib-debug.mak
+	# filter out some defaults we don't need for
+	# release. This is an no-op example
+	CFLAGS :=$(filter-out -O9,$(CFLAGS))
+endif
+
+# additional flags for release builds
 release: CFLAGS += -DNDEBUG
+release: CFLAGS += -std=c99 # our library is strictly C99
 release: compile-now
-	
+
+# if the target is "debug" we include the
+# default release CFLAGS, LDFLAGS, ...
+ifeq ($(MAKECMDGOALS),debug)
+	include ../compiler-defines/lib-debug.mak
+endif
+
 # flags for debug builds
 debug: CFLAGS += -DDEBUG
 debug: CFLAGS += -g
@@ -19,6 +46,12 @@ BUILD_DIR = $(ROOTDIR)/build
 # all source files are located in the this
 # directory, source them
 LIB_SRC = $(wildcard *.c)
+
+# Delete all files that are normally created
+# by running "make release" or "make debug"
+clean:
+	@rm -rf $(BUILD_DIR)
+	@rm -rf $(LIB_FULL_PATH)
 
 
 # Please, do not change below this paragraph,
@@ -50,16 +83,15 @@ LIB_FULL_PATH = $(BUILD_DIR)/$(LIB_NAME_FULL)
 compile-now: make-build-dir $(LIB_FULL_PATH)
 
 $(BUILD_DIR)/%.o: $(ROOTDIR)/%.c
-	$(CC) $(CFLAGS) -c -fPIC $< -o $@
+	@echo $$CC
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -fPIC $< -o $@
 
 .PHONY: make-build-dir objects all compile-now release debug
 
 $(LIB_FULL_PATH): $(LIB_OBJ_FULL_PATH)
-	$(CC) -shared -fPIC -Wl,-soname,$(LIB_SO_NAME) -o $(LIB_FULL_PATH) $(LIB_OBJ_FULL_PATH) -lc
+	$(CC) $(LDFLAGS) -pipe -shared -fpic -fPIC -Wl,-soname,$(LIB_SO_NAME) -o $(LIB_FULL_PATH) $(LIB_OBJ_FULL_PATH) -lc
 
 make-build-dir:
 	@mkdir -p $(BUILD_DIR)
 
-clean:
-	@rm -rf $(BUILD_DIR)
-	@rm -rf $(LIB_FULL_PATH)
+
