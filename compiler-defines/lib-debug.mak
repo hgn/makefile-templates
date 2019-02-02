@@ -192,5 +192,5 @@ CPPFLAGS += -D_FORTIFY_SOURCE=2
 # RELRO (read-only relocation). The options relro & now specified together are
 # known as "Full RELRO". You can specify "Partial RELRO" by omitting the now
 # flag. RELRO marks various ELF memory sections read­only (E.g. the GOT)
-LDFLAGS += -Wl,-z,now -Wl,-z,relro -fpie -Wl,-pie -Wl,-z,defs
+LDFLAGS += -Wl,-z,now -Wl,-z,relro -Wl,-z,defs
 

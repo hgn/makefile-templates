@@ -1,8 +1,8 @@
 
 all: clean release clean 
 
-#export CC=clang-7
-#export AR=llvm-ar-7
+export CC=clang-7
+export AR=llvm-ar-7
 
 scan:
 	scan-build-7 -o /tmp/myhtmldir make release
