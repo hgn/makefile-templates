@@ -1,5 +1,9 @@
 #include <stdlib.h>
 
+static int warning()
+{
+}
+
 static void allocate(void)
 {
 	char *buf;
