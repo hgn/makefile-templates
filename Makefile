@@ -1,15 +1,16 @@
 
-all: clean release clean 
+all: clean release clean debug
 
 export CC=clang-7
 export AR=llvm-ar-7
+export LD_LIBRARY_PATH=./lib-foo/build/
 
 scan:
 	scan-build-7 -o /tmp/myhtmldir make release
 
 release:
-	make -C app-bar release
 	make -C lib-foo release
+	make -C app-bar release
 	@echo reproducable build check:
 	md5sum lib-foo/build/libfoo.so
 	# aptitude install devscripts

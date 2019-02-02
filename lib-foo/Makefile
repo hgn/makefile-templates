@@ -2,6 +2,8 @@ LIB_NAME = libfoo
 LIB_VERSION = 1.0.0
 LIB_VERSION_MAJOR = 1
 
+.DEFAULT_GOAL := release
+
 # Enable debugging information (using -g),
 # even for optimized production builds. Having
 # only partly usable debugging information (due
@@ -16,26 +18,30 @@ CFLAGS += -g -grecord-gcc-switches
 # we don't want to repeat ourself all the time
 include ../compiler-defines/setup.mak
 
-# if the target is "release" we include the
+
+# if the target is "debug" we include the
 # default release CFLAGS, LDFLAGS, ...
-# we start with the same flags as debug
-ifeq ($(MAKECMDGOALS),release)
-	include ../compiler-defines/lib-debug.mak
+ifeq ($(MAKECMDGOALS),debug)
+	include ../compiler-defines/lib-common.mak
+	CFLAGS += -DBUILD_DEBUG
+else
+	# NOTE: we do not check for release, we simple
+	# treat every other (unknown) option as release
+  # if the target is "release" we include the
+  # default release CFLAGS, LDFLAGS, ...
+  # we start with the same flags as debug
+	include ../compiler-defines/lib-common.mak
 	# filter out some defaults we don't need for
 	# release. This is an no-op example
 	CFLAGS :=$(filter-out -O9,$(CFLAGS))
+	CFLAGS += -DBUILD_RELEASE
 endif
+
 
 # additional flags for release builds
 release: CFLAGS += -DNDEBUG
 release: CFLAGS += -std=c99 # our library is strictly C99
 release: compile-now
-
-# if the target is "debug" we include the
-# default release CFLAGS, LDFLAGS, ...
-ifeq ($(MAKECMDGOALS),debug)
-	include ../compiler-defines/lib-debug.mak
-endif
 
 # flags for debug builds
 debug: CFLAGS += -DDEBUG
@@ -89,7 +95,6 @@ LIB_STATIC_FULL_PATH = $(BUILD_DIR)/$(LIB_STATIC_NAME_FULL)
 compile-now: make-build-dir $(LIB_FULL_PATH)
 
 $(BUILD_DIR)/%.o: $(ROOTDIR)/%.c
-	@echo $$CC
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -fPIC $< -o $@
 
 .PHONY: make-build-dir objects all compile-now release debug
