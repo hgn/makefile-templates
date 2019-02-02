@@ -1,4 +1,3 @@
-
 # minimal set of warnings
 CFLAGS += -Wall
 
@@ -27,13 +26,6 @@ CFLAGS += -Werror=implicit-function-declaration
 # if you have false positives
 CFLAGS += -Wimplicit-fallthrough
 
-# warn if something like occurs:
-#    if (some_condition())
-#        foo ();
-#        bar ();  // gotcha
-# FIXME: disabled for now, clang does not support it
-#CFLAGS += -Wmisleading-indentation
-
 # Warn whenever a switch statement does not have a
 # default case
 CFLAGS += -Wswitch-default
@@ -42,25 +34,6 @@ CFLAGS += -Wswitch-default
 # based on the assumption that signed overflow does
 # not occur.
 CFLAGS += -Wstrict-overflow
-
-# Look suspicious, allocate 0 and more the 10k. We
-# increase if this is required
-#CFLAGS += -Walloc-zero
-#CFLAGS += -Walloc-size-larger-than=10240
-
-# Warn when an if-else has identical branches.
-# This warning detects cases like
-#     if (p != NULL)
-#       return 0;
-#     else
-#       return 0;
-#CFLAGS += -Wduplicated-branches
-
-# Warn about duplicated conditions in an if-else-if
-# chain. For instance, warn for the following code:
-#    if (p->q != NULL) { … }
-#    else if (p->q != NULL) { … }
-#CFLAGS += -Wduplicated-cond
 
 # Warn if floating-point values are used in equality
 # comparisons.  In particular, instead of testing for
@@ -129,13 +102,6 @@ CFLAGS += -Wpadded
 # headers.
 CFLAGS += -Winline
 
-# The e compiler will warn for declarations of variable-length
-# arrays whose size is either unbounded, or bounded by an
-# argument that allows the array size to exceed byte-size bytes
-# > 512 looks way to large. We should disable VLAs altogether
-# see LKML for a security discussion about VLAs
-#CFLAGS += -Wvla-larger-than=512
-
 # Warn about string constants that are longer than the “minimum
 # maximum” length specified in the C standard.
 # Just warn, probably an error.
@@ -171,6 +137,43 @@ CFLAGS += -fwrapv
 # stack-based buffer overflows even if the thread in question
 # is never canceled.
 CFLAGS += -fexceptions
+
+# some flags just work for gcc
+ifneq ($(cc-name),clang)
+				# Look suspicious, allocate 0 and more the 10k. We
+				# increase if this is required
+				CFLAGS += -Walloc-zero
+				CFLAGS += -Walloc-size-larger-than=10240
+
+				# warn if something like occurs:
+				#    if (some_condition())
+				#        foo ();
+				#        bar ();  // gotcha
+				# FIXME: disabled for now, clang does not support it
+				CFLAGS += -Wmisleading-indentation
+
+				# Warn when an if-else has identical branches.
+				# This warning detects cases like
+				#     if (p != NULL)
+				#       return 0;
+				#     else
+				#       return 0;
+				CFLAGS += -Wduplicated-branches
+
+				# Warn about duplicated conditions in an if-else-if
+				# chain. For instance, warn for the following code:
+				#    if (p->q != NULL) { … }
+				#    else if (p->q != NULL) { … }
+				CFLAGS += -Wduplicated-cond
+
+				# The e compiler will warn for declarations of variable-length
+				# arrays whose size is either unbounded, or bounded by an
+				# argument that allows the array size to exceed byte-size bytes
+				# > 512 looks way to large. We should disable VLAs altogether
+				# see LKML for a security discussion about VLAs
+				CFLAGS += -Wvla-larger-than=512
+endif
+
 
 
 # reproducible build, Warn when macros __TIME__, __DATE__

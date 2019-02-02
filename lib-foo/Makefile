@@ -12,6 +12,10 @@ LIB_VERSION_MAJOR = 1
 # information before distributing binaries
 CFLAGS += -g -grecord-gcc-switches
 
+# we need some global macros, and functions
+# we don't want to repeat ourself all the time
+include ../compiler-defines/setup.mak
+
 # if the target is "release" we include the
 # default release CFLAGS, LDFLAGS, ...
 # we start with the same flags as debug
@@ -79,6 +83,8 @@ LIB_OBJ_FULL_PATH = $(patsubst $(ROOTDIR)/%,$(BUILD_DIR)/%,$(LIB_SRC_FULL_PATH:%
 LIB_SO_NAME = $(LIB_NAME).so.$(LIB_VERSION_MAJOR)
 LIB_NAME_FULL = $(LIB_NAME).so
 LIB_FULL_PATH = $(BUILD_DIR)/$(LIB_NAME_FULL)
+LIB_STATIC_NAME_FULL = $(LIB_NAME).a
+LIB_STATIC_FULL_PATH = $(BUILD_DIR)/$(LIB_STATIC_NAME_FULL)
 
 compile-now: make-build-dir $(LIB_FULL_PATH)
 
@@ -90,6 +96,8 @@ $(BUILD_DIR)/%.o: $(ROOTDIR)/%.c
 
 $(LIB_FULL_PATH): $(LIB_OBJ_FULL_PATH)
 	$(CC) $(LDFLAGS) -pipe -shared -fpic -fPIC -Wl,-soname,$(LIB_SO_NAME) -o $(LIB_FULL_PATH) $(LIB_OBJ_FULL_PATH) -lc
+	# and an static archive as well
+	$(AR) rcs $(LIB_STATIC_FULL_PATH) $(LIB_OBJ_FULL_PATH)
 
 make-build-dir:
 	@mkdir -p $(BUILD_DIR)

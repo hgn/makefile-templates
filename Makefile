@@ -1,7 +1,8 @@
 
 all: clean release clean 
 
-export CC=clang-7
+#export CC=clang-7
+#export AR=llvm-ar-7
 
 scan:
 	scan-build-7 -o /tmp/myhtmldir make release
@@ -12,7 +13,7 @@ release:
 	@echo reproducable build check:
 	md5sum lib-foo/build/libfoo.so
 	# aptitude install devscripts
-	hardening-check lib-foo/build/libfoo.so
+	#hardening-check lib-foo/build/libfoo.so
 
 debug:
 	make -C app-bar debug
