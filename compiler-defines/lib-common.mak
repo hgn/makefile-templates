@@ -186,11 +186,28 @@ CPPFLAGS += -Wdate-time
 # performance loss. This should be enabled system-wide
 CPPFLAGS += -D_FORTIFY_SOURCE=2
 
+# GLIBC Feature test macros.
+# Bypass 64bit limitations and POSIX requirements. This flag
+# should be sufficiently.
+CPPFLAGS += -D_FILE_OFFSET_BITS=64
+CPPFLAGS += -D_LARGEFILE_SOURCE
+
+# f you define this macro, everything is included: ISO C89, ISO C99,
+# POSIX.1, POSIX.2, BSD, SVID, X/Open, LFS, and GNU extensions.
+# In the cases where POSIX.1 conflicts with BSD, the POSIX definitions
+# take precedence.
+# Defining this is a recommendation: "We recommend you use _GNU_SOURCE
+# in new programs."
+# -- https://www.gnu.org/software/libc/manual/html_node/Feature-Test-Macros.html
+CPPFLAGS += -D_GNU_SOURCE
 
 
 
 # RELRO (read-only relocation). The options relro & now specified together are
 # known as "Full RELRO". You can specify "Partial RELRO" by omitting the now
 # flag. RELRO marks various ELF memory sections read­only (E.g. the GOT)
-LDFLAGS += -Wl,-z,now -Wl,-z,relro -Wl,-z,defs
+LDFLAGS += -Wl,-z,now -Wl,-z,relro
+
+# Finally: I removed -Wl,-z,defs (prevents underlinking) from LDFLAGS
+# because it aborted compile runs for clang with address sanitizer.
 

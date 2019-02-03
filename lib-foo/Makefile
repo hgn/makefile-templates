@@ -1,6 +1,4 @@
 LIB_NAME = libfoo
-LIB_VERSION = 1.0.0
-LIB_VERSION_MAJOR = 1
 
 .DEFAULT_GOAL := release
 
@@ -18,10 +16,13 @@ CFLAGS += -g -grecord-gcc-switches
 # we don't want to repeat ourself all the time
 include ../compiler-defines/setup.mak
 
-
 # if the target is "debug" we include the
 # default release CFLAGS, LDFLAGS, ...
 ifeq ($(MAKECMDGOALS),debug)
+	# enable sanitizer support for release and
+	# debug builds
+	include ../compiler-defines/sanitizer.mak
+
 	include ../compiler-defines/lib-common.mak
 	CFLAGS += -DBUILD_DEBUG
 else
@@ -86,7 +87,7 @@ LIB_SRC_FULL_PATH = $(patsubst %,$(ROOTDIR)/%,$(LIB_SRC))
 # object file list, with replaced BUILD_DIR 
 LIB_OBJ_FULL_PATH = $(patsubst $(ROOTDIR)/%,$(BUILD_DIR)/%,$(LIB_SRC_FULL_PATH:%.c=%.o))
 
-LIB_SO_NAME = $(LIB_NAME).so.$(LIB_VERSION_MAJOR)
+LIB_SO_NAME = $(LIB_NAME).so
 LIB_NAME_FULL = $(LIB_NAME).so
 LIB_FULL_PATH = $(BUILD_DIR)/$(LIB_NAME_FULL)
 LIB_STATIC_NAME_FULL = $(LIB_NAME).a

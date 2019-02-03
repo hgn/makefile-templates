@@ -9,9 +9,19 @@ include ../compiler-defines/setup.mak
 # if the target is "debug" we include the
 # default release CFLAGS, LDFLAGS, ...
 ifeq ($(MAKECMDGOALS),debug)
+	# enable sanitizer support just for debug
+	# For release the overhead may be to high:
+	# typical slowdown introduced by Memory
+	# Sanitizer is 3x
+	include ../compiler-defines/sanitizer.mak
+
 	# and this again
 	include ../compiler-defines/app-common.mak
 	CFLAGS += -DBUILD_DEBUG
+	# this is fine for debug, debug symbols
+	# are already added (-g), we will strip
+	# them out later, at install and bootup
+	CFLAGS += -O1
 else
 	# NOTE: we do not check for release, we simple
 	# treat every other (unknown) option as release
@@ -23,6 +33,10 @@ else
 	# release. This is an no-op example
 	CFLAGS :=$(filter-out -O9,$(CFLAGS))
 	CFLAGS += -DBUILD_RELEASE
+	# this is fine for release, we can optimize
+	# more aggresievely if required (so we have some
+	# options, if we are running out of CPU cycles)
+	CFLAGS += -O2
 endif
 
 # where to search for header files (own and libs)
